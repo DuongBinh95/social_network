@@ -1,0 +1,27 @@
+extends layout
+
+block content
+    h1 Create new user
+    .row
+        .col-md-6.col-md-offset-3
+            form(method="post")
+                .form-group
+                    label Name
+                    input(name="name").form-control
+                .form-group
+                    label Email
+                    input(name="email").form-control
+                .form-group
+                    label Password
+                    input(name="password").form-control
+                .form-group
+                    label Gender
+                    input(name="gender").form-control
+                .form-group
+                    label DayOfBirth
+                    input(name="dob").form-control
+                .form-group
+                    label
+                    input(name="email").form-control
+                .form-group
+                    input(type="submit", value="Create").form-control.btn.btn-success
