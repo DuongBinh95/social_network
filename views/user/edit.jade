@@ -1,0 +1,36 @@
+extends layout
+
+block content
+
+    if message
+        .message #{message}
+    form(method="post" , enctype="multypart/form-data")
+        .form-group
+            label Name
+            input(name="name" , value="#{users.name}").form-control
+        .form-group
+            label Email
+            input(name="email" , value="#{users.email}").form-control
+        .form-group
+            label Password
+            input(name="password" , value="#{users.password}").form-control
+        .form-group
+            label Gender
+            input(name="gender" , value="#{users.gender}").form-control
+        .form-group
+            label Day Of Birth
+            input(name="dob" , value="#{users.dob}").form-control
+        .form-group
+            label Image
+            input(name="img" , value="#{users.img}").form-control
+        .form-group
+            label Address
+            input(name="address" , value="#{users.address}").form-control
+        .form-group
+            label Workplace
+            input(name="workplace" , value="#{users.workplace}").form-control
+        .form-group
+            label Post
+            input(name="posts" , value="#{users.posts}").form-control
+        .form-group
+            button.btn.btn-success Update
