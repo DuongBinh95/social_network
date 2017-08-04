@@ -7,18 +7,22 @@ var Schema = mongoose.Schema;
 var postSchema = new Schema({
     title : String,
     content : String,
+    image : String,
     user: {
+        _id : Schema.Types.ObjectId,
         name : String,
         profile :String
     },
-    comment :{
+    comments :[{
+        _id :Schema.Types.ObjectId,
         content : String,
-        uesr : {
+        user : [{
+            _id : Schema.Types.ObjectId,
             name : String,
             profile : String
-        },
+        }],
         create_at : Schema.Types.Date
-    },
+    }],
     like : [Schema.Types.ObjectId],
     date_create : Schema.Types.Date
 },{collection: "posts"});

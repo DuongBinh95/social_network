@@ -1,93 +1,99 @@
+/**
+ * Created by duong on 8/2/17.
+ */
 var express = require('express');
 var router = express.Router();
-var User = require('../models/user')
+var multer = require('multer');
+var fs = require('fs');
+var User = require('../app/models/user');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+var storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, 'public/uploads/');
+    },
+    filename: function(req, file, cb){
+        cb(null, file.originalname);
+    }
 });
 
-/* Create new User */
-router.post('/new', function (req , res) {
-    var user = new User();
-    user.name = req.body.name;
-    user.email = req.body.email;
-    user.password = req.body.password;
-    user.gender = req.body.gender;
-    user.dob = req.body.dob;
-    user.img = req.files.img;
-    user.address = req.body.address;
-    user.workplace = req.body.workplace;
-    user.posts = [];
+var upload = multer({storage : storage});
 
-    user.save(function (err) {
-        if(err){
-          res.render('error', { message:"Error creating user" , error:{status:500}});
+/* GET home page. Listing users */
+router.get('/', function(req, res) {
+    User.find({}, function (err, users) {
+        res.json({ posts: users });
+    });
+});
+
+/* view a single users */
+router.get('/users/:id' , function (req , res) {
+    User.findById(res.params.id , function (err , user) {
+        if (err){
+            res.json({message : 'User was not found ' , error : err});
         }else {
-          res.redirect('/');
+            res.json({post : user});
         }
-    })
-})
-/*Show delete user form*/
-router.get('/delete/:id', function(req, res){
-  User.findById(req.params.id, function(err, user){
-        if(user){
-            res.render('delete', {user: user});
-        } else {
-            res.render('error', {message: "User not found", error: {status: 404}});
+    });
+});
+
+/* Create new user*/
+router.post('/', upload.single('img') ,  function (req , res) {
+    User.create({
+        name : req.body.name,
+        email : req.body.email,
+        password : req.body.password,
+        gender : req.body.gender,
+        dob : req.body.dob,
+        img : req.file.originalname,
+        address : req.body.address,
+        workplace :req.body.workplace,
+        posts :[]
+    },function (err) {
+        if(!err){
+            res.json({message:'User create successfully !'});
+        }else {
+            res.json({message: 'Error creting user!'});
         }
     });
 });
 /* Delete a user */
-router.post('/delete/:id', function(req, res){
-    User.findById(req.params.id, function(err, user){
-        if(user) {
-            user.remove(function(err2){
-                if(err2) {
-                    res.render('error', {message: "Error deleting user", error: {status: 500}});
-                } else {
-                    res.redirect('/');
-                }
+router.delete("/delete/:id", function (req , res) {
+    User.findById(req.params.id , function (err , user) {
+        if (err){
+            res.json({message:"User was not found" , error: error});
+        }else {
+            fs.unlink('public/upload' + user.img ,function (err3) {
             });
-        } else {
-            res.render('error', {message: "User not found", error: {status: 404}});
+            user.remove(function (err2) {
+                if(err2){
+                    res.json({message : "Error deleting user" , error: error});
+                }else {
+                    res.json({message: "Success"});
+                };
+            });
         }
     });
 });
-/* Show edit user form */
-router.get('/edit/:id', function(req, res){
-    User.findById(req.params.id, function(err, user){
-        if(user){
-            res.render('edit', {contact: user});
-        } else {
-            res.render('error', {message: "User not found", error: {status: 404}});
+/* Update a user*/
+router.put("/edit/:id", upload.single('img'),function (req , res) {
+    User.findById(req.params.id , function (err , user) {
+        user.name = req.body.name;
+        user.email = req.body.email;
+        user.password = req.body.password;
+        user.gender = req.body.gender;
+        user.dob = req.body.dob;
+        if (req.file){
+            user.img = req.file.originalname;
         }
+        user.address = req.body.address;
+        user.workplace = req.body.workplace;
+
+        user.save(function (err) {
+            res.json({post : user});
+        })
     });
 });
 
-/* Update new User */
-router.post('/edit/:id', function(req, res){
-    User.findById(req.params.id, function(err, user){
-        if(contact){
-            user.name = req.body.name;
-            user.email = req.body.email;
-            user.password = req.body.password;
-            user.gender = req.body.gender;
-            user.dob = req.body.dob;
-            user.img = req.files.img;
-            user.address = req.body.address;
-            user.workplace = req.body.workplace;
-            user.save(function(err){
-                if(err){
-                    res.render('error', {message: "Error updating user", error: {status: 500}});
-                } else {
-                    res.redirect('/');
-                }
-            });
 
-        } else {
-            res.render('error', {message: "User not found", error: {status: 404}});
-        }
-    });
-});
+
 module.exports = router;
